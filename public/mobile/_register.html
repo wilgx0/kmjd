@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+        <link rel="stylesheet" href="https://unpkg.com/vant/lib/index.css">
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="css/app/common.css"/>
+        <script src='js/vue/vue.dev.js'></script>
+        <script src="https://unpkg.com/vant/lib/vant.min.js"></script>
+		<style>
+            .upload-img{
+                text-align:center;
+            }
+		</style>
+	</head>
+
+	<body>
+
+		<div id="app">
+			
+			<div class='head'>
+				<h1>注册申请</h1>
+			</div>
+			
+				
+			<div class='field-item mark'>
+				<div>申请人:</div>
+				<div class='img-personnel'>
+					<input type="text"  v-model="username" data-name='申请人' ref='username'>
+				</div>
+			</div>
+			
+			<div class='field-item mark'>
+				<div>联系电话:</div>
+				<div class='img-mobile'>
+					<input type="text" v-model="mobile" data-name='联系电话' ref='mobile'>
+				</div>
+			</div>
+
+            <div class='field-item mark'>
+                <div>登录密码:</div>
+                <div class='img-password'>
+                    <input type="text" v-model="password" data-name='密码' ref='password'>
+                </div>
+            </div>
+
+            <div class='field-item'>
+                <div>申请码:</div>
+                <div>
+                    <input type="text" v-model="recommend_code" >
+                </div>
+            </div>
+
+			<div class='field-item mark'>
+				<div>申请类型:</div>
+				<div >
+					<div class="mui-input-row mui-radio mui-left">
+						<label>全民经纪人</label>
+						<input name="user_type" type="radio" value="1" v-model="user_type" >
+					</div>
+					<div class="mui-input-row mui-radio mui-left">
+						<label>经纪公司</label>
+						<input name="user_type" type="radio" value="2" v-model="user_type"  >
+					</div>
+				</div>
+			</div>
+			
+			<div v-show="user_type == 2">
+				<div class='field-item mark'>
+					<div>公司名称:</div>
+					<div>
+						<input type="text" v-model="company_name"  data-name='公司名称' ref='company_name'>
+					</div>
+				</div>
+				
+				<div class='field-item mark'>
+					<div>负责人:</div>
+					<div class='img-personnel'>
+						<input type="text" v-model="leader" data-name='负责人' ref='leader'>
+					</div>
+				</div>
+
+                <div class='field-item mark'>
+                    <div>公司电话:</div>
+                    <div class='img-mobile'>
+                        <input type="text" v-model="company_mobile" data-name='公司电话' ref='company_mobile'>
+                    </div>
+                </div>
+
+                <div class='field-item mark'>
+                    <div>法人身份证照上传:</div>
+                    <div  class='upload-img' data-name='法人身份证照' ref='leader_id'>
+                        <van-uploader :after-read="onRead_1" accept="image/gif, image/jpeg">
+                            <van-icon name="photograph" />
+                        </van-uploader>
+                    </div>
+                </div>
+
+				<div class='field-item mark'>
+					<div>营业执照上传:</div>
+					<div  class='upload-img' data-name='营业执照' ref='license'>
+                        <van-uploader :after-read="onRead_2" accept="image/gif, image/jpeg">
+                            <van-icon name="photograph" />
+                        </van-uploader>
+					</div>
+				</div>
+				
+				<div class='field-item mark'>
+					<div>开户许可证上传:</div>
+                    <div  class='upload-img' data-name='开户许可证' ref='open_account'>
+                        <van-uploader :after-read="onRead_3" accept="image/gif, image/jpeg">
+                            <van-icon name="photograph" />
+                        </van-uploader>
+                    </div>
+
+				</div>
+			</div>
+			
+			<div class='foot'> 	
+			    <div ref='error' class='error'></div>
+			    <button type="button" class="mui-btn mui-btn-block" @click='sendData'>提交</button>
+			 
+			</div>
+			
+			<div class='loading' v-show="showLoading">
+				<img src="img/app/loading.gif" alt="" />
+			</div>
+		</div>
+        <script src="js/axios.min.js"></script>
+		<script src="js/app/common.js?v=1811081661"></script>
+		<script>
+			common.setHtmlFontSize();
+
+			var app = new Vue({
+				el: '#app',
+				data: {
+                    recommend_code:'',      //申请码
+                    password:'',        //密码
+					user_type:1,		//申请类型
+					username:'',		//申请人
+					mobile:'',   		//联系电话
+					company_name:'',	//公司名称
+					leader:'',         	//负责人
+                    company_mobile:'',  //公司电话
+                    leader_id:'',       //法人身份证照
+					license:'',			//营业执照
+					open_account:'',	//开户许可证
+					showLoading:false,
+				},
+				methods: {
+                    onRead_1(file) {            //法人身份证照
+                        console.log(file);
+                        this.leader_id = file.content;
+
+                    },
+                    onRead_2(file) {            //营业执照
+                        console.log(file);
+                        this.license = file.content;
+
+                    },
+                    onRead_3(file) {            //开户许可证
+                        console.log(file);
+                        this.open_account = file.content;
+
+                    },
+					sendData:function(){			//发送数据	
+						var _this = this;
+					    var checkAll = _this.user_type == 2 ? true : false;
+					    
+						//数据验证	
+						function checkData(callback){
+							_this.$refs['error'].innerHTML = '';
+							for(var i in _this.$data){
+								var v = _this.$data[i];
+								var result = callback(i,v);
+								if( result != ''){
+									var el = _this.$refs[i];
+									if(el){
+										var p = document.createElement('p')
+										p.innerHTML = el.getAttribute('data-name') + result;
+										_this.$refs['error'].appendChild(p);
+									} 
+								}
+							}					
+						}
+						
+						function isMobile(str) {
+				            var myreg = /^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/ ;
+                            var myreg_1 = /\d{3}-\d{8}|\d{4}-\d{7}/ ;
+				            if (myreg.test(str) || myreg_1.test(str)) {
+				                return true;
+				            } else {
+				                return false;
+				            }
+				        }
+
+						checkData(function(i,v){
+							if(checkAll){
+								if(v == '')  return  ' 必填';
+                                if( i == 'mobile' || i == 'company_mobile'){
+                                    if(!isMobile(v)) return ' 格式错误';
+                                }
+							} else {
+								if(i == 'username' && v == '') return  ' 必填';
+                                if(i == 'mobile' && v == '') return  ' 必填';
+                                if(i == 'password' && v == '') return  ' 必填';
+                                if(i == 'user_type' && v == '') return  ' 必填';
+                                if( i == 'mobile' ){
+                                    if(!isMobile(v)) return ' 格式错误';
+                                }
+                            }
+
+						    return '';
+						});
+						
+						if(_this.$refs['error'].innerHTML != ''){
+							return false;
+						}
+
+                        _this.showLoading = true;
+                        axios({
+                            method: 'post',
+                            url: common.baseUrl + '/api/pm/user/add',
+                            data: {
+                               user_type:_this.user_type,		//申请类型
+                               username:_this.username,		//申请人
+                               mobile:_this.mobile,   		    //联系电话
+                               password:_this.password,   		//密码
+                               recommend_code:_this.recommend_code,    //申请码
+                               company_mobile:this.company_mobile,
+                               leader_id: _this.leader_id,
+                               company_name:_this.company_name,
+                               leader:_this.leader,
+                               license:_this.license,
+                               open_account:_this.open_account
+                            }
+                        })
+                        .then(function(response){
+                            _this.showLoading = false;
+                            response = response.status == 200 ? response.data : false;
+                            if(!response){
+                                console.log(response);return false;
+                            }
+                            if(response.code == 1){
+                                _this.user_type = 1;
+                                _this.username = '';
+                                _this.password = '';
+                                _this.mobile = '';
+                                _this.company_name = '';
+                                _this.company_mobile = '';
+                                _this.leader_id = '';
+                                _this.leader = '';
+                                _this.license = '';
+                                _this.open_account = '';
+
+                                _this.recommend_code = '';
+
+                                _this.$refs['error'].innerHTML = '';
+                                vant.Toast(response.msg);
+                            } else if(response.msg) {
+                                vant.Toast(response.msg);
+                            } else {
+                                vant.Toast('添加失败');
+                            }
+
+                        })
+                        .catch(function(response){
+                            _this.showLoading = false; console.log(response);
+                        });
+
+					}
+				}
+			});
+
+
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,148 @@
+<include file="public@header" />
+<style>
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+
+<script type="text/html" id="leader_id-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="leader_id_photos[]" value="{filepath}">
+        <input class="form-control" id="photo-{id}-name" type="text" name="leader_id_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+
+<script type="text/html" id="license-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="license_photos[]" value="{filepath}">
+        <input class="form-control" id="photo-{id}-name" type="text" name="license_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+
+<script type="text/html" id="open_account-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="open_account_photos[]" value="{filepath}">
+        <input class="form-control" id="photo-{id}-name" type="text" name="open_account_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:url('user/index')}">用户列表</a></li>
+			<li class="active"><a href="{:url('user/add')}">用户添加</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('user/addpost')}">
+			<div class="form-group">
+				<label  class="col-sm-2 control-label"><span class="form-required">*</span>申请人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  name="username">
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label"><span class="form-required">*</span>联系电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  name="mobile" >
+				</div>
+			</div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"><span class="form-required">*</span>密码</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="password" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">申请类型</label>
+                <div class="col-md-6 col-sm-10">
+                    <label class="radio-inline">
+                        <input type="radio" name="user_type" value="1" checked> 全民经济人
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="user_type" value="2"> 经济公司
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="user_type" value="3"> 内部人员
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"><span class="form-required">*</span>公司名称</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="company_name" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"><span class="form-required">*</span>公司电话</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="company_mobile" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"><span class="form-required">*</span>负责人</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="leader" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"><span class="form-required">*</span>法人身份证号</label>
+                <div class="col-md-6 col-sm-10">
+                    <ul id="leader_id" class="pic-list list-unstyled form-inline"></ul>
+                    <a href="javascript:uploadMultiImage('图片上传','#leader_id','leader_id-tpl',null,null,0);"
+                       class="btn btn-default btn-sm">选择图片</a>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"><span class="form-required">*</span>营业执照</label>
+                <div class="col-md-6 col-sm-10">
+                    <ul id="license" class="pic-list list-unstyled form-inline"></ul>
+                    <a href="javascript:uploadMultiImage('图片上传','#license','license-tpl',null,null,0);"
+                       class="btn btn-default btn-sm">选择图片</a>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"><span class="form-required">*</span>开户许可证</label>
+                <div class="col-md-6 col-sm-10">
+                    <ul id="open_account" class="pic-list list-unstyled form-inline"></ul>
+                    <a href="javascript:uploadMultiImage('图片上传','#open_account','open_account-tpl',null,null,0);"
+                       class="btn btn-default btn-sm">选择图片</a>
+                </div>
+            </div>
+
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('ADD')}</button>
+				</div>
+			</div>
+		</form>
+	</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+</script>
+</body>
+</html>

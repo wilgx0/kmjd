@@ -1,0 +1,219 @@
+body{
+	background-color: #FFFFFF;
+}
+
+.head{
+	 border-bottom: 1px solid #E9E9E9;
+	 padding: 1rem;
+     display:flex;
+     justify-content:space-between;
+}
+.head h1{
+	 font-size:24px;
+}
+
+.field-item {
+	padding: 1rem;
+	
+}
+
+.field-item .img-date, .field-item .img-mobile, .field-item .img-number, .field-item .img-personnel,.field-item .img-password{
+	position:relative;
+	z-index: 1;
+}
+
+.field-item .img-date input, .field-item .img-mobile input, .field-item .img-number input, .field-item .img-personnel input, .field-item .img-password input{
+	text-indent: 2rem;
+}
+.field-item .img-date::before{
+	content: url(../../img/app/date.png);
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 2;
+    color:#848484;
+}
+
+.field-item .img-mobile::before{
+	content: url(../../img/app/mobile.png);
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 2;
+    color:#848484;
+}
+
+.field-item .img-number::before{
+	content: url(../../img/app/number.png);
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 2;
+    color:#848484;
+}
+
+.field-item .img-personnel::before{
+	content: url(../../img/app/personnel.png);
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 2;
+    color:#848484;
+}
+
+.field-item .img-password::before{
+    content: url(../../img/app/password.png);
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 2;
+    color:#848484;
+}
+.mark> :first-child::after {
+	content: '*';
+	color: red;
+	position: relative;
+	top: 0.2rem;
+	left: 0.5rem;
+}
+
+.field-item> :first-child {
+	margin-bottom: 0.5rem;
+	font-size: 16px;
+	font-weight: 700;
+	position: relative;
+	text-indent: 1.2rem;
+	height: 1.2rem;
+	line-height: 1.2rem;
+	color: #333;
+}
+
+.field-item> :first-child::before {
+	content: '';
+	width: 0.3rem;
+	height: 0.3rem;
+	background-color: #000000;
+	position: absolute;
+	top: 0.4rem;
+	left: 0.4rem;
+	transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+}
+
+.field-item> :last-child {}
+.field-item> :last-child img{
+	width: 100%;
+}
+.field-item > :last-child > input, .field-item > :last-child > button {
+	height: 2.14rem;
+	line-height: 2.14rem;
+	margin: 0;
+	padding: 0;
+	color: #505050;
+	font-size: 14px;
+}
+
+.field-item .upload{
+	position: relative;
+}
+.field-item .upload::after{
+	content: url(../../img/app/upload.png);
+	position: absolute;
+	top:0;
+	left: 0;
+	width: 100%;
+	background-color: #ffffff;
+    text-align: center;
+}
+
+.foot {
+    border-top: 1px solid #E9E9E9;
+	padding: 1rem;
+	
+}
+
+.foot button{
+	background-color:rgb(67, 67, 67);
+	color:#FFFFFF;
+}
+
+/*加载动画*/
+.loading{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.3);
+    z-index: 999;
+}
+
+/*表单验证*/
+.error  > p{
+    color:red;
+}
+
+/*侧滑*/
+#offcanvas,.offcanvas{
+    position:fixed;
+    top:0px;
+    left:0px;
+    z-index: 998;
+    width:100%;
+    height:100%;
+    background-color:#FFFFFF;
+}
+.offcanvas {
+
+}
+
+#offcanvas .article-content,.offcanvas .article-content{
+    padding:0.5rem;
+    padding-top: 55px;
+}
+#offcanvas .article-content img,.offcanvas .article-content img{
+    width: 100%;
+}
+
+
+.offcanvas .off-head {
+    display: flex;
+    justify-content:space-between;
+    align-items:center;
+    height:44px;
+    background-color:#f7f7f7;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+.offcanvas .off-head > div.left-arrows {
+    position:relative;
+}
+.offcanvas .off-head > div.left-arrows:before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-right-width: 0.1rem;
+    border-bottom-width: 0.1rem;
+    transform: rotate(135deg);
+    border-color: #2672FF;
+    position: absolute;
+    top: -0.3rem;
+    left: 0.6rem;
+}
+.offcanvas .off-content{
+    overflow: scroll;
+    margin-top: 44px;
+    height: 93.4%;
+    height:-moz-calc(100% - 44px);
+    height:-webkit-calc(100% - 44px);
+    height: calc(100% - 44px);
+    background-color: #efeff4;
+    padding:1rem;
+}

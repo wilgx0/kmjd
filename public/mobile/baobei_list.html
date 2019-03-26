@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <title></title>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="css/animate.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mui.picker.min.css" />
+    <link href="css/mui.poppicker.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="css/app/common.css"/>
+    <style>
+        .mui-content > .mui-table-view:first-child {
+            margin-top: -1px;
+        }
+
+        #app {
+            color: #333;
+        }
+
+        .baobei-list {
+            background-color: #efeff4;
+        }
+
+        .list-item {
+            height: 6rem;
+            padding: 0.5rem;
+            font-size: 14px;
+            color: #2e3135;
+            background: #ffffff;
+            border-radius: 15px;
+            margin: 0.2rem;
+        }
+
+        .list-item > table {
+            width: 100%;
+        }
+
+        .list-item > table tr {
+            height: 1.5rem;
+        }
+
+        .list-item > table tr td:nth-of-type(even) {
+            color: #909090;
+            font-size: 12px;
+        }
+
+        .list-item > table .button {
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: #2e3135;
+            width: 8.55rem;
+        }
+
+        .list-item > table .button.btn-disable {
+            background-color: #ccc;
+            color: #ffffff;
+        }
+        .list-item > table .button.btn-yellow {
+            background-color: #f0ad4e;
+            border-color: #f0ad4e;
+            color: #ffffff;
+        }
+        .list-item > table .button.btn-red {
+            background-color: #dd524d;
+            border-color: #dd524d;
+            color: #ffffff;
+        }
+        .list-item > table .button.btn-enabled {
+            background-color: #4cd964;
+            border: 1px solid #4cd964;
+            color: #ffffff;
+        }
+
+        .details{
+            list-style:none;
+            margin:0;
+            font-size: 20px;
+            padding: 0.5rem;
+            background-color: #fff;
+            box-shadow: 7px 7px 10px #888888;
+        }
+        .details > li{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            height:3rem;
+            border-bottom: 1px dashed  #ccc;
+        }
+        .details > li :last-child{
+            font-size:16px;
+            color: #909090;
+        }
+        .details  li:last-child{
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <header class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">报备客户列表</h1>
+        <button class="mui-btn mui-btn-blue mui-btn-link mui-pull-right" @click="logoff">注销</button>
+    </header>
+
+    <!--下拉刷新容器-->
+    <div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+        <div class="mui-scroll">
+            <!--数据列表-->
+            <ul class="mui-table-view mui-table-view-chevron baobei-list">
+                <li class="list-item" v-for="(v,i) in client_list" @click.stop="details(i)">
+                    <table>
+                        <tr>
+                            <td>客户姓名:</td>
+                            <td>{{v.client_name}}</td>
+                            <td>客户电话:</td>
+                            <td>{{v.client_mobile}}</td>
+                        </tr>
+                        <tr>
+                            <td>报备时间:</td>
+                            <td>{{v.create_time|timestampToTime}}</td>
+                            <td>预计到访:</td>
+                            <td>{{v.client_time}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <!--<div :class="['button',(v.status == 0 && v.accompany == '' ) ? 'btn-enabled':'btn-disable' ]"-->
+                                     <!--@click.stop="accompany(i,v.status == 0 && v.accompany == '')">{{v.accompany == '' ? '未带看' : '已带看'}}-->
+                                <!--</div>-->
+                                <div v-show="v.good_status == 1" :class="['button',(v.status == 0 && v.accompany == '' ) ? 'btn-enabled':'btn-disable' ]">
+                                    {{v.valid == 1 ? '有效' : '无效'}}/{{v.accompany == '' ? '未到访' : '已到访'}}
+                                </div>
+                            </td>
+                            <td colspan="2">
+                                <!--<div :class="['button',v.status == 1 ? 'btn-disable' : 'btn-enabled']"-->
+                                     <!--@click.stop="complete(i,v.status == 0)">{{v.status == 1 ? '已成交' : '未成交'}}-->
+                                <!--</div>-->
+                                <template v-if="v.good_status == 1">
+                                    <div :class="['button',v.status == 1 ? (v.closing == 1 ? 'btn-disable' : 'btn-yellow') : 'btn-enabled']">
+                                        {{v.status == 1 ? '已成交' : '未成交'}}
+                                        {{v.closing == 1 ? '-已结佣' : ''}}
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <div  :class="['button','btn-red']">
+                                        未审核
+                                    </div>
+                                </template>
+
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- 登录侧滑 -->
+    <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+        <div id='offcanvas' v-show="showOffcanvas">
+            <iframe :src="loginUrl" style="width: 100%;height:100%;"></iframe>
+        </div>
+    </transition>
+
+    <!--带看-->
+    <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+        <div class="offcanvas" v-show="showAccompany">
+            <div class="off-head">
+                <div class="left-arrows" @click="showAccompany = false"></div>
+                <div>带看</div>
+                <div></div>
+            </div>
+            <div class="off-content">
+                　<button  data-options='{}' class="btn mui-btn mui-btn-block" ref="accompany">选择时间 ...</button>
+                  <button type="button" class="mui-btn mui-btn-primary mui-btn-block" @click="accompanyAction">确 定</button>
+            </div>
+        </div>
+    </transition>
+
+    <!--成交-->
+    <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+        <div class="offcanvas" v-show="showComplete">
+            <div class="off-head">
+                <div class="left-arrows" @click="showComplete = false"></div>
+                <div>成交</div>
+                <div></div>
+            </div>
+            <div class="off-content">
+            　	<div class='field-item mark'>
+                    <div>房号:</div>
+                    <div class='img-personnel'>
+                        <input type="text"  v-model="roomon">
+                    </div>
+                </div>
+
+                <div class='field-item mark'>
+                    <div>面积:</div>
+                    <div class='img-personnel'>
+                        <input type="text"  v-model="area">
+                    </div>
+                </div>
+
+                <div class='field-item mark'>
+                    <div>价格:</div>
+                    <div class='img-personnel'>
+                        <input type="text"  v-model="price">
+                    </div>
+                </div>
+
+                <div class='foot'>
+                    <button type="button" class="mui-btn mui-btn-block" style="background-color: #007aff;" @click="completeAction">提交</button>
+                </div>
+            </div>
+        </div>
+
+    </transition>
+
+    <!--详情-->
+    <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+        <div class="offcanvas" v-show="showDetails">
+            <div class="off-head">
+                <div class="left-arrows" @click="showDetails = false"></div>
+                <div>详情</div>
+                <div></div>
+            </div>
+            <div class="off-content">
+                <v-details :data="client_list[currentItemIndex] || null"></v-details>
+            </div>
+        </div>
+    </transition>
+
+
+
+
+
+    <!--加载动画-->
+    <div class='loading' v-show="showLoading">
+        <img src="img/app/loading.gif" alt=""/>
+    </div>
+
+</div>
+
+<template id="details">
+
+    <ul class="details" >
+        <li><div>审核状态:</div><div>{{data && (data.good_status==1?'已审核':'未审核')}}</div></li>
+        <li><div>报备项目:</div><div>{{data && data.obj_name}}</div></li>
+        <li><div>报备日期:</div><div>{{data && data.create_time|timestampToTime}}</div></li>
+        <li><div>报备人员:</div><div>{{data && data.u_name}}</div></li>
+        <li><div>报备人电话:</div><div>{{data && data.u_mobile}}</div></li>
+        <li><div>分销公司:</div><div>{{data && data.u_company}}</div></li>
+        <li><div>经济人归属:</div><div>{{data && data.department_name}}</div></li>
+
+        <li><div>客户名称:</div><div>{{data && data.client_name}}</div></li>
+        <li><div>客户电话:</div><div>{{data && data.client_mobile}}</div></li>
+        <li><div>预计到访时间:</div><div>{{data && data.client_time}}</div></li>
+        <li><div>客户到访人数:</div><div>{{data && data.client_num}}</div></li>
+        <li><div>实际到访时间:</div><div>{{data && data.accompany}}</div></li>
+
+        <li><div>房号:</div><div>{{data && data.roomon}}</div></li>
+        <li><div>面积:</div><div>{{data && data.area}}</div></li>
+        <li><div>价格:</div><div>{{data && data.price}}</div></li>
+        <li><div>佣金:</div><div>{{(data && data.brokerage) || 0}}</div></li>
+        <li><div>是否审核:</div><div>{{data && (data.good_status==1?'已审':'未审核')}}</div></li>
+        <li><div>是否有效:</div><div>{{data && (data.valid==1?'有效':'无效')}}</div></li>
+        <li><div>是否成交:</div><div>{{data && (data.status==1?'已成交':'未成交')}}</div></li>
+        <li><div>是否结佣:</div><div>{{data && (data.closing==1?'已结佣':'未结佣')}}</div></li>
+    </ul>
+</template>
+
+<script src="js/mui.min.js"></script>
+<script src="js/mui.picker.min.js"></script>
+<script src="js/mui.poppicker.js"></script>
+<script src='js/vue/vue.dev.js'></script>
+<script src="js/app/common.js?v=1811081661"></script>
+<script>
+    common.setHtmlFontSize();
+
+    Vue.filter('timestampToTime', common.timestampToTime);
+    var app = new Vue({
+        el: '#app',
+        data: {
+            loginUrl: '',                  //登录界面url
+            showOffcanvas: false,        //登录侧滑显示
+            showLoading: false,          //加载动画
+            client_list: [],              //数据列表
+            showAccompany: false,         //带看侧滑
+            showComplete: false,          //成交
+            showDetails: false,              //详情
+            currentItemIndex:-1,                 //操作的前数据索引
+
+            roomon:'',                      //房号
+            area:'',                        //面积
+            price:'',                       //价格
+
+        },
+        methods: {
+            logoff: function () {      //退出登录
+                common.logoff();
+            },
+            accompany: function (i,isAction) {       //带看
+                if(isAction){
+                    this.currentItemIndex = i;
+                    this.$refs['accompany'].innerText = '选择时间 ...';
+                    this.showAccompany = true;
+                }
+            },
+            accompanyAction:function(){         //记录带看时间
+                var _this = this;
+                var item = this.client_list[this.currentItemIndex] || false;
+                if(!item || !item.accompany_temp || item.accompany_temp == ''){
+                    mui.toast('请选择时间!');
+                    return false;
+                }
+                this.showLoading = true;
+                common.token_http(common.baseUrl + '/api/pm/Baobei/accompany_action',{
+                    id:item.id,
+                    accompany: item.accompany_temp,
+                },function(data){
+                    _this.showLoading = false;
+                    if(data.code == 1){
+                        item.accompany = item.accompany_temp;
+                        mui.toast(data.msg);
+                    } else if(data.msg) {
+                        mui.toast(data.msg);
+                    } else {
+                        mui.toast('操作失败!');
+                    }
+                },function(){_this.showLoading = false;})
+            },
+            complete: function (i,isAction) {        //成交
+                if(isAction){
+                    this.currentItemIndex = i;
+                    this.showComplete = true;
+                    this.roomon = '';
+                    this.area = '';
+                    this.price = '';
+                }
+            },
+            completeAction:function(){      //确定成交
+                var _this = this;
+                var item = this.client_list[this.currentItemIndex] || false;
+                if(!item) {
+                    mui.toast('没有找到数据');
+                    return false;
+                }
+                if(this.roomon == '' || this.area == '' || this.price ==''){
+                    mui.toast('请填写房号、面积和价格!');
+                    return false;
+                }
+                this.showLoading = true;
+                common.token_http(common.baseUrl + '/api/pm/Baobei/complete_action',{
+                    id:item.id,
+                    roomon: this.roomon,
+                    area:this.area,
+                    price:this.price,
+                },function(data){
+                    _this.showLoading = false;
+                    if(data.code == 1){
+                        item.roomon = _this.roomon;
+                        item.area = _this.area;
+                        item.price = _this.price;
+                        item.status = 1;
+                        mui.toast(data.msg);
+                    } else if(data.msg) {
+                        mui.toast(data.msg);
+                    } else {
+                        mui.toast('操作失败!');
+                    }
+                },function(){_this.showLoading = false;})
+            },
+            details:function(i){         //显示详情
+
+                this.currentItemIndex = i;
+                this.showDetails = true;
+            },
+            setAccompanyData:function(data){            //作用于时间控件给项目带看时间赋值
+                currentItemIndex = this.currentItemIndex;
+                if(currentItemIndex >=0){
+                    this.client_list[currentItemIndex] && (this.client_list[currentItemIndex].accompany_temp = data);
+                }
+            }
+        },
+        mounted: function () {
+            var _this = this;
+            common.isLogin(function (response) {
+                if (!response) {
+                    _this.loginUrl = common.baseUrl + '/mobile/login.html';
+                    _this.showOffcanvas = true;
+                } else {
+                    listInit();
+                }
+            });
+        },
+        watch: {
+            showOffcanvas: function (v) {
+                if (v === false) {
+                    listInit();
+                }
+            }
+        },
+        components:{
+            'v-details':{
+                template:'#details',
+                props:['data'],
+                filters: {
+                    timestampToTime:common.timestampToTime,
+                }
+            }
+        }
+    });
+
+    (function ($) {
+        $.init();
+
+        //初始化只执行一次
+        var isInit = false;
+
+        //下拉列表初始化
+        function listInit() {
+            if (isInit == true) {
+                return false;
+            }
+            isInit = true;
+            var pullrefresh = $('#pullrefresh');
+            pullrefresh.on('tap', 'li', function (event) {
+                this.click();
+                return false;
+            });
+            pullrefresh.on('tap', 'div', function (event) {
+                this.click();
+                return false;
+            });
+            var page = 1;
+            pullrefresh.pullRefresh({
+                down: {
+                    style: 'circle',
+                    callback: pulldownRefresh
+                },
+                up: {
+                    auto: true,
+                    contentrefresh: '正在加载...',
+                    callback: pullupRefresh
+                }
+            });
+
+            //获取列表数据
+            function getListData(callback) {
+                common.token_http(common.baseUrl + '/api/pm/Baobei/get_list', {page: page++}, function (response) {
+                    var hasData = response.code == 1 && response.data.length > 0;
+                    callback && callback(hasData);
+                    if (hasData) {
+                        pullrefresh.pullRefresh().endPullupToRefresh(false);
+                        app.client_list = app.client_list.concat(response.data);
+                    } else {
+                        pullrefresh.pullRefresh().endPullupToRefresh(true);
+                    }
+
+                }, function () {
+                    callback && callback(false);
+                })
+            }
+
+            //上拉加载
+            function pullupRefresh() {
+                getListData();
+            }
+
+            //下拉刷新
+            function pulldownRefresh() {
+                var temp = page;
+                page = 1;
+                pullrefresh.pullRefresh().refresh(true); //重置上拉加载
+                getListData(function (hasData) {
+                    if (hasData) {
+                        app.client_list = [];
+                    } else {
+                        page = temp;
+                    }
+                    pullrefresh.pullRefresh().endPulldownToRefresh();
+                });
+            }
+        }
+
+        window['listInit'] = listInit;
+
+        //清理时间选择控件上的显示值
+        function clearDtPicker(){
+            var btns = $('.btn');
+            btns.each(function(i, btn) {
+                this.innerText = '选择时间 ...';
+            })
+        }
+        window['clearDtPicker'] = clearDtPicker;
+
+        //日期时间
+        var btns = $('.btn');
+        btns.each(function(i, btn) {
+            btn.addEventListener('tap', function() {
+                var _self = this;
+                if(_self.picker) {
+                    _self.picker.show(function (rs) {
+                        //console.log('选择结果1: ' + rs.text) ;
+                        btn.innerText = rs.text;
+                        _self.picker.dispose();
+                        _self.picker = null;
+                    });
+                } else {
+                    var optionsJson = this.getAttribute('data-options') || '{}';
+                    var options = JSON.parse(optionsJson);
+                    var id = this.getAttribute('id');
+                    /*
+                     * 首次显示时实例化组件
+                     * 示例为了简洁，将 options 放在了按钮的 dom 上
+                     * 也可以直接通过代码声明 optinos 用于实例化 DtPicker
+                     */
+                    _self.picker = new $.DtPicker(options);
+                    _self.picker.show(function(rs) {
+                        /*
+                         * rs.value 拼合后的 value
+                         * rs.text 拼合后的 text
+                         * rs.y 年，可以通过 rs.y.vaue 和 rs.y.text 获取值和文本
+                         * rs.m 月，用法同年
+                         * rs.d 日，用法同年
+                         * rs.h 时，用法同年
+                         * rs.i 分（minutes 的第二个字母），用法同年
+                         */
+                        //console.log('选择结果2: ' + rs.text) ;
+                        btn.innerText = rs.text;
+                        app.setAccompanyData(rs.text);
+                        /*
+                         * 返回 false 可以阻止选择框的关闭
+                         * return false;
+                         */
+                        /*
+                         * 释放组件资源，释放后将将不能再操作组件
+                         * 通常情况下，不需要示放组件，new DtPicker(options) 后，可以一直使用。
+                         * 当前示例，因为内容较多，如不进行资原释放，在某些设备上会较慢。
+                         * 所以每次用完便立即调用 dispose 进行释放，下次用时再创建新实例。
+                         */
+                        _self.picker.dispose();
+                        _self.picker = null;
+                    });
+                }
+
+            }, false);
+        });
+    })(mui);
+
+
+</script>
+</body>
+</html>

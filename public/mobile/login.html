@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+
+		<link rel="stylesheet" type="text/css" href="css/app/common.css"/>
+		<style>
+
+		</style>
+	</head>
+
+	<body>
+
+		<div id="app">
+
+			<div class='head'>
+				<h1>登录</h1>
+			</div>
+
+
+			<div class='field-item mark'>
+				<div>请输入你的联系电话:</div>
+				<div class='img-mobile'>
+					<input type="text"  v-model="mobile" data-name='联系电话' ref='mobile'>
+				</div>
+			</div>
+
+			<div class='field-item mark'>
+				<div>密 码:</div>
+				<div class='img-password'>
+					<input type="password" v-model="password" data-name='密码' ref='password'>
+				</div>
+			</div>
+
+			<div class='foot'>
+			    <div ref='error' class='error'></div>
+			    <button type="button" class="mui-btn mui-btn-block" @click='sendData'>登录</button>
+
+			</div>
+
+			<div class='loading' v-show="showLoading">
+				<img src="img/app/loading.gif" alt="" />
+			</div>
+		</div>
+
+		<script src="js/mui.min.js"></script>
+		<script src='js/vue/vue.dev.js'></script>
+		<script src="js/app/common.js?v=1811081661"></script>
+		<script>
+
+			common.setHtmlFontSize();
+			var app = new Vue({
+				el: '#app',
+				data: {
+					mobile:'',
+			        password:'',
+					showLoading:false,
+				},
+				methods: {
+					sendData:function(){			//发送数据
+						var _this = this;
+
+						//数据验证
+						function checkData(callback){
+							_this.$refs['error'].innerHTML = '';
+							for(var i in _this.$data){
+								var v = _this.$data[i];
+								var result = callback(i,v);
+								if( result != ''){
+									var el = _this.$refs[i];
+									if(el){
+										var p = document.createElement('p')
+										p.innerHTML = el.getAttribute('data-name') + result;
+										_this.$refs['error'].appendChild(p);
+									}
+								}
+							}
+						}
+
+						checkData(function(i,v){
+                            if(v == ''){
+                                return ' 必填';
+                            } else {
+                                return '';
+                            }
+						});
+
+						if(_this.$refs['error'].innerHTML != ''){
+							return false;
+						}
+
+						//提交数据
+						_this.showLoading = true;
+						common.http(common.baseUrl + '/api/pm/user/login',{
+                            mobile:_this.mobile,
+                            password:_this.password,
+                            device_type:'mobile',
+                        },function(data){
+						    _this.showLoading = false;
+							if(data.code == 1){
+                                mui.toast(data.msg);
+                                var data = data.data
+                                localStorage.setItem('XX-Token',data.token);
+                                localStorage.setItem('XX-Device-Type', 'mobile');
+                                localStorage.setItem('user', JSON.stringify(data.user));
+                                parent.app.showOffcanvas = false;
+                            } else if(data.msg) {
+                                mui.toast(data.msg);
+                            }
+						},function(){_this.showLoading = false;})
+					}
+				}
+			});
+
+			(function($, doc) {
+				$.init();
+			})(mui, document);
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,170 @@
+<include file="public@header" />
+<style>
+    .show-img{
+        cursor:pointer;
+    }
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('user/index')}">用户列表</a></li>
+        <li><a href="{:url('user/add')}">用户添加</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="post" action="{:url('User/index')}">
+        分类:
+        <?php $user_type = input('request.user_type',''); ?>
+        <select class="form-control" name="user_type" style="width: 140px;">
+            <option value='0'>全部</option>
+            <option value='1'   <if condition="$user_type eq 1"> selected = "selected" </if> >全民经济人</option>
+            <option value='2' <if condition="$user_type eq 2"> selected = "selected" </if> >经济公司</option>
+            <option value='3' <if condition="$user_type eq 3"> selected = "selected" </if> >内部人员</option>
+        </select>
+        用户名:
+        <input type="text" class="form-control" name="username" style="width: 120px;" value="{:input('request.username/s','')}" placeholder="请输入用户名称">
+
+        <input type="submit" class="btn btn-primary" value="搜索" />
+        <a class="btn btn-danger" href="{:url('User/index')}">清空</a>
+    </form>
+    <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th width="50">ID</th>
+            <th>申请人</th>
+            <th>联系电话</th>
+            <th>申请类型</th>
+            <th>公司名称</th>
+            <th>公司电话</th>
+            <th>负责人</th>
+            <th>法人证件</th>
+            <th>营业执照</th>
+            <th>开户许可证</th>
+            <th>状态</th>
+            <th>归属</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+            <foreach name="users" item="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.username}</td>
+                    <td>{$vo.mobile}</td>
+                    <td>
+                        <if condition="$vo['user_type'] eq 1">全民经济人</if>
+                        <if condition="$vo['user_type'] eq 2">经济公司</if>
+                        <if condition="$vo['user_type'] eq 3">内部人员</if>
+                    </td>
+                    <td>{$vo.company_name}</td>
+                    <td>{$vo.company_mobile}</td>
+                    <td>{$vo.leader}</td>
+                    <td>
+                        <a class="show-img" data-id="{$vo.id}" data-field="leader_id">
+                            <i class="fa fa-photo fa-fw"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="show-img" data-id="{$vo.id}" data-field="license">
+                            <i class="fa fa-photo fa-fw"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="show-img" data-id="{$vo.id}" data-field="open_account">
+                            <i class="fa fa-photo fa-fw"></i>
+                        </a>
+                    </td>
+                    <td>{$vo.user_status == 1 ? '<span style="color:green";>已审</span>' : '<span style="color:red";>未审</span>' }</td>
+                    <td>
+                        <input class="form-control" type="text" style="width:400px;" required value="{$vo.department_name}"
+                               placeholder="请选择归属" onclick="doSelectCategory('{$vo.id}');" id="js-categories-name-input-{$vo.id}"
+                               readonly/>
+                        <input class="form-control" type="hidden" value="{$vo.department}" name="post[categories]"
+                               id="js-categories-id-input-{$vo.id}"/>
+                    </td>
+                    <td>
+                        <a href='{:url("user/edit",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a>
+                        <a class="js-ajax-delete" href="{:url('user/delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
+                        <if condition="$vo['user_status'] eq 1">
+                            <a class="js-ajax-dialog-btn" data-msg="您确定反审核吗"
+                               href="{:url('user/toggle',['ids'=>$vo.id,'status'=>0])}">反审核</a>
+
+                        <else/>
+                            <a class="js-ajax-dialog-btn" data-msg="您确定审核吗"
+                               href="{:url('user/toggle',['id'=>$vo.id,'status'=>1])}">审核</a>
+                        </if>
+                    </td>
+                </tr>
+            </foreach>
+
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+
+
+    $('.show-img').click(function(){
+        var id = $(this).data('id');
+        var field = $(this).data('field');
+        console.log(id);
+        console.log(field);
+        $.ajax({
+            url:"{:url('User/getVal')}",
+            type:'get',
+            data:{
+                id:id,
+                field:field
+            },
+            success:function(response){
+                if(response.code == 1 ){
+                    imagePreviewDialog(response.data);
+                } else {
+                    imagePreviewDialog('');
+                }
+
+            },
+            error:function(){
+                imagePreviewDialog('');
+            }
+        });
+        return false;
+    })
+    function doSelectCategory(id) {
+        var selectedCategoriesId = $('#js-categories-id-input-'+ id).val();
+        openIframeLayer("{:url('User/select')}?ids=" + selectedCategoriesId, '请选择归属', {
+            area: ['700px', '400px'],
+            btn: ['确定', '取消'],
+            yes: function (index, layero) {
+
+                var iframeWin          = window[layero.find('iframe')[0]['name']];
+                var selectedCategories = iframeWin.confirm();
+                if (selectedCategories.selectedCategoriesId.length == 0) {
+                    layer.msg('请选择归属');
+                    return;
+                }
+                $('#js-categories-id-input-'+ id).val(selectedCategories.selectedCategoriesId.join(','));
+                $('#js-categories-name-input-'+ id).val(selectedCategories.selectedCategoriesName.join(' '));
+                //向后台发送修改数据
+                $.ajax({
+                    url:'{:url(\'User/select\')}',
+                    type:'post',
+                    data:{
+                        id:id,
+                        select_ids:selectedCategories.selectedCategoriesId,
+                    },
+                    success:function(response){
+                        console.log(response);
+                    },
+                    error:function(){
+
+                    }
+                });
+                layer.close(index); //如果设定了yes回调，需进行手工关闭
+            }
+        });
+    }
+</script>
+</body>
+</html>

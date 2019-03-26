@@ -1,0 +1,201 @@
+<include file="public@header" />
+<style>
+
+</style>
+
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:url('Baobei/index')}">所有报备</a></li>
+            <li class="active"><a>编辑报备</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('Baobei/editpost')}">
+
+            <input  type="hidden" name="id" value="{$id}">
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">是否审核</label>
+                <div class="col-md-6 col-sm-10">
+                    <label class="radio-inline">
+                        <input type="radio" name="good_status" value="0" <eq name="good_status" value="0">checked</eq>   >否
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="good_status" value="1" <eq name="good_status" value="1">checked</eq> >是
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">是否有效</label>
+                <div class="col-md-6 col-sm-10">
+                    <label class="radio-inline">
+                        <input type="radio" name="valid" value="0" <eq name="valid" value="0">checked</eq>   >否
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="valid" value="1" <eq name="valid" value="1">checked</eq> >是
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">报备项目</label>
+                <div class="col-md-6 col-sm-10">
+                    <select class="form-control" name="obj_id" id="input-parent">
+                        <foreach name="pm_obj" item="vo">
+                            <option value="{$vo.id}">{$vo.obj_name}</option>
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+
+
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">客户名称</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="client_name" value="{$client_name}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">客户电话</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="client_mobile" value="{$client_mobile}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">预计到访时间</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control baobei-bootstrap-datetime"  name="client_time" value="{$client_time}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">客户到访人数</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="client_num" value="{$client_num}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">实际到访时间</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control baobei-bootstrap-datetime"  name="accompany" value="{$accompany}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">是否成交</label>
+                <div class="col-md-6 col-sm-10">
+                    <label class="radio-inline">
+                        <input type="radio" name="status" value="0" <eq name="status" value="0">checked</eq>   >否
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="status" value="1" <eq name="status" value="1">checked</eq> >是
+                    </label>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">房号</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="roomon" value="{$roomon}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">面积</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="area" value="{$area}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">价格</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="price" value="{$price}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label  class="col-sm-2 control-label">佣金</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control"  name="brokerage" value="{$brokerage}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">结佣<p style="color:red;">(结佣后以上信息将无法修改)</p></label>
+                <div class="col-md-6 col-sm-10">
+                    <label class="radio-inline">
+                        <input type="radio" name="closing" value="0" <eq name="closing" value="0">checked</eq> >否
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="closing" value="1" <eq name="closing" value="1">checked</eq> >是
+                    </label>
+                </div>
+            </div>
+
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+				</div>
+			</div>
+
+		</form>
+	</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    $(function(){
+        var bootstrapDateTimeInput_baobei = $("input.baobei-bootstrap-datetime");
+        if (bootstrapDateTimeInput_baobei.length) {
+            Wind.css('bootstrapDatetimePicker');
+            Wind.use('bootstrapDatetimePicker', function () {
+                bootstrapDateTimeInput_baobei.datetimepicker({
+                    language: 'zh-CN',
+                    format: 'yyyy-mm-dd hh:ii',
+                    todayBtn: 1,
+                    autoclose: true,
+                });
+            });
+        }
+
+
+        $("input[name='closing']").change(function(){
+            var closing_val = $(this).val();
+            var status = $("input[name='status']");
+            var good_status = $("input[name='good_status']");
+            if(closing_val == 1){
+                status.eq(0).prop('checked',false);
+                status.eq(1).prop('checked',true);
+
+                good_status.eq(0).prop('checked',false);
+                good_status.eq(1).prop('checked',true);
+            }
+        });
+
+        $("input[name='status']").change(function(){
+            var status = $(this).val();
+            var good_status = $("input[name='good_status']");
+            if(status == 1){
+                good_status.eq(0).prop('checked',false);
+                good_status.eq(1).prop('checked',true);
+            }
+        });
+
+        $("input[name='good_status']").change(function(){
+            var good_status = $(this).val();
+            var status = $("input[name='status']");
+            var closing = $("input[name='closing']");
+            if(good_status == 0){
+                status.eq(0).prop('checked',true);
+                status.eq(1).prop('checked',false);
+                closing.eq(0).prop('checked',true);
+                closing.eq(1).prop('checked',false);
+            }
+        });
+    })
+
+</script>
+</body>
+</html>

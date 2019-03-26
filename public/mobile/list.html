@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+ 	<link href="css/mui.min.css" rel="stylesheet"/>
+	<link rel="stylesheet" type="text/css" href="css/animate.css" />
+	<link rel="stylesheet" type="text/css" href="css/app/list.css?v=1811101509" />
+	<style>
+		
+	</style>
+</head>
+<body>
+	
+<div id="app">
+	<div class='head'>
+		<h1>{{categoriesAndList[activeIndex] && categoriesAndList[activeIndex].name}}</h1>
+	</div>
+	<div class='content'>
+		<div class='tab-body'>
+			<!--下拉刷新容器-->	
+			<template v-for="(category,index) in categoriesAndList">	
+				<div :id="'pullrefresh'+index"  class="mui-content mui-scroll-wrapper" v-show='index == activeIndex'>
+					<div class="mui-scroll" >
+						<!--数据列表-->
+						<ul class="mui-table-view mui-table-view-chevron">			
+							<li class='list-item' v-for="(v,i) in category.articleList" @click='showArticle(v)'>
+								<div class='left'><img :src="v.more.thumbnail" alt="" /></div>
+								<div class='right'>
+									<h2>{{v.post_title}}</h2>
+									<p>{{v.post_excerpt}}</p>
+								</div>
+							</li>								
+						</ul>
+					</div>
+				</div>
+			</template>
+		</div>
+	</div>
+	
+	<!--侧滑文章页-->
+	<transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+		<div id='offcanvas' v-show="showOffcanvas">
+			<header class="mui-bar mui-bar-nav my-bar">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left" @click='hideOffcanvas'></a>
+				<h1 class="mui-title">{{currentAriticle.post_title}}</h1>
+			</header>
+		
+			<div class='article-content' v-html="currentAriticle.post_content">
+			</div>
+	
+		</div>
+	</transition>
+</div>
+
+<script src="js/mui.min.js"></script>
+<script src='js/vue/vue.dev.js'></script>
+<script src="js/app/common.js?v=1811081661"></script>
+<script src="js/app/list.js?v=1811101511"></script>
+<script >
+	
+    
+</script>
+</body>
+</html>

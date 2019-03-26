@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <title></title>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="css/animate.css"/>
+    <link rel="stylesheet" type="text/css" href="css/app/common.css"/>
+    <style>
+
+        .mui-content > .mui-table-view:first-child {
+            margin-top: -1px;
+        }
+
+        #app {
+            color: #333;
+        }
+
+        .user-list {
+            background-color: #efeff4;
+        }
+
+        .list-item {
+            height: 8rem;
+            padding: 0.5rem;
+            font-size: 14px;
+            color: #2e3135;
+            background: #ffffff;
+            border-radius: 15px;
+            margin: 0.2rem;
+        }
+
+        .list-item > table {
+            width: 100%;
+        }
+
+        .list-item > table tr {
+            height: 1.5rem;
+        }
+
+        .list-item > table tr td:nth-of-type(even) {
+            color: #909090;
+            font-size: 12px;
+        }
+
+        .list-item > table .button {
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: #2e3135;
+            width: 90%;
+        }
+
+        .list-item > table .button.btn-disable {
+            background-color: #ccc;
+            color: #ffffff;
+        }
+
+        .list-item > table .button.btn-enabled {
+            background-color: #4cd964;
+            border: 1px solid #4cd964;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <header class="mui-bar mui-bar-nav">
+        <h1 id="title" class="mui-title">经济人列表</h1>
+        <button class="mui-btn mui-btn-blue mui-btn-link mui-pull-right" @click="logoff">注销</button>
+    </header>
+
+    <!--下拉刷新容器-->
+    <div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+        <div class="mui-scroll">
+            <!--数据列表-->
+            <ul class="mui-table-view mui-table-view-chevron user-list">
+                <li class="list-item"  v-for="(v,i) in client_list">
+                    <table>
+                        <tr>
+                            <td>申请人:</td>
+                            <td>{{v.username}}</td>
+                            <td>联系电话:</td>
+                            <td>{{v.mobile}}</td>
+                        </tr>
+                        <tr>
+                            <td>类型:</td>
+                            <td>{{v.user_type|userTypeStr}}</td>
+                            <td>申请日期:</td>
+                            <td>{{v.create_time|timestampToTime}}</td>
+                        </tr>
+                        <tr>
+                            <td>公司名称:</td>
+                            <td colspan="3">{{v.company_name}}</td>
+                        </tr>
+                        <tr>
+                            <td>负责人:</td>
+                            <td>{{v.leader}}</td>
+                            <td>审核状态:</td>
+                            <td :style="v.user_status == 1 ? 'color:green;' : 'color:red;'">{{v.user_status == 1 ? "已审核" : '未审核'}}</td>
+                        </tr>
+                        <tr>
+                            <td>推荐人:</td>
+                            <td colspan="3">{{v.department_name}}</td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 登录侧滑 -->
+    <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+        <div id='offcanvas' v-show="showOffcanvas">
+            <iframe :src="loginUrl" style="width: 100%;height:100%;"></iframe>
+        </div>
+    </transition>
+
+    <!--加载动画-->
+    <div class='loading' v-show="showLoading">
+        <img src="img/app/loading.gif" alt=""/>
+    </div>
+
+</div>
+
+<script src="js/mui.min.js"></script>
+<script src='js/vue/vue.dev.js'></script>
+<script src="js/app/common.js?v=1811081661"></script>
+<script>
+    common.setHtmlFontSize();
+    var app = new Vue({
+        el: '#app',
+        data: {
+            loginUrl: '',                  //登录界面url
+            showOffcanvas: false,        //登录侧滑显示
+            showLoading: false,          //加载动画
+            client_list: [],            //数据列表
+        },
+        methods: {
+            logoff: function () {      //退出登录
+                common.logoff();
+            },
+        },
+        mounted: function () {
+            var _this = this;
+            common.isLogin(function (response) {
+                if (!response) {
+                    _this.loginUrl = common.baseUrl + '/mobile/login.html';
+                    _this.showOffcanvas = true;
+                } else {
+                    listInit();
+                }
+            });
+        },
+        watch: {
+            showOffcanvas: function (v) {
+                if (v === false) {
+                    listInit();
+                }
+            }
+        },
+        filters:{
+            timestampToTime:common.timestampToTime,
+            userTypeStr:function(v){
+                if(v == 1){
+                    return '全民经济人';
+                } else if(v == 2){
+                    return '经济公司';
+                } else if(v == 3){
+                    return '内部人员';
+                }
+            }
+        }
+    });
+
+    (function ($) {
+        $.init();
+
+        //初始化只执行一次
+        var isInit = false;
+
+        //下拉列表初始化
+        function listInit() {
+            if (isInit == true) {
+                return false;
+            }
+            isInit = true;
+            var page = 1;
+            var pullrefresh = $('#pullrefresh');
+
+            pullrefresh.pullRefresh({
+                down: {
+                    style: 'circle',
+                    callback: pulldownRefresh
+                },
+                up: {
+                    auto: true,
+                    contentrefresh: '正在加载...',
+                    callback: pullupRefresh
+                }
+            });
+
+            //获取列表数据
+            function getListData(callback) {
+                common.token_http(common.baseUrl + '/api/pm/Baobei/get_user_list', {page: page++}, function (response) {
+                    var hasData = response.code == 1 && response.data.length > 0;
+                    callback && callback(hasData);
+                    if (hasData) {
+                        pullrefresh.pullRefresh().endPullupToRefresh(false);
+                        app.client_list = app.client_list.concat(response.data);
+                    } else {
+                        pullrefresh.pullRefresh().endPullupToRefresh(true);
+                    }
+
+                }, function () {
+                    callback && callback(false);
+                })
+            }
+
+            //上拉加载
+            function pullupRefresh() {
+                getListData();
+            }
+
+            //下拉刷新
+            function pulldownRefresh() {
+                var temp = page;
+                page = 1;
+                pullrefresh.pullRefresh().refresh(true); //重置上拉加载
+                getListData(function (hasData) {
+                    if (hasData) {
+                        app.client_list = [];
+                    } else {
+                        page = temp;
+                    }
+                    pullrefresh.pullRefresh().endPulldownToRefresh();
+                });
+            }
+        }
+
+        window['listInit'] = listInit;
+
+
+    })(mui);
+
+
+</script>
+</body>
+</html>

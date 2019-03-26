@@ -1,0 +1,42 @@
+<include file="public@header" />
+<style>
+
+</style>
+
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:url('Pm/index')}">所有项目</a></li>
+			<li ><a href="{:url('Pm/add')}">添加项目</a></li>
+            <li class="active"><a>编辑项目</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('Pm/editpost')}">
+            <input  type="hidden" name="id" value="{$id}">
+			<div class="form-group">
+				<label  class="col-sm-2 control-label"><span class="form-required">*</span>项目名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  name="obj_name" value="{$obj_name}">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">项目描述</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  name="obj_describe" value="{$obj_describe}">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+				</div>
+			</div>
+		</form>
+	</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+</script>
+</body>
+</html>

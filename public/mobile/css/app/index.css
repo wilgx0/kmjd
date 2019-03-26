@@ -1,0 +1,100 @@
+/*幻灯片*/
+.top{
+	height:9.6rem;
+}
+.top .swiper-container {
+    width: 100%;
+    height: 100%;
+}  
+.top .swiper-container .swiper-wrapper img{
+	width: 100%;
+    height: 100%;
+}
+
+/*正文*/
+.content .tab-head{
+	height:2.3rem;
+	background-color:#f2f2f2;
+	display: -webkit-flex; /* Safari */
+	display: flex;
+}
+.content .tab-head > div{
+	flex:1;
+	line-height:2.3rem;
+	text-align:center;
+	font-size:15px;
+}
+.content .tab-head > div.active { 
+	color:#21b100;
+}
+
+.content .tab-body .list-item{
+	display: -webkit-flex; /* Safari */
+	display: flex;
+	padding: 0.1rem 0.5rem;
+	height:5.2rem;
+	justify-content:center;
+	align-items:center;
+    border-bottom: 1px solid #e2e2e2;
+}
+.content .tab-body .list-item > div {
+	height:90%;
+	display: flex;
+	justify-content:center;
+	align-items:center;
+	flex-direction:column;
+}
+.content .tab-body .list-item > div.left{
+	padding-right: 0.3rem;
+	width:30%;
+}
+.content .tab-body .list-item > div.left img{
+	width:100%;
+	overflow:hidden;
+}
+.content .tab-body .list-item > div.right{
+	width:70%;
+}
+.content .tab-body .list-item > div.right :nth-child(1){
+    font-weight: 400;
+    font-size: 16px;
+    color: #000;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-wrap: normal;
+}
+.content .tab-body .list-item > div.right :nth-child(2){
+    font-size: 13px;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.3;
+}
+
+.content .tab-body .mui-scroll-wrapper {
+	top:11.9rem;
+}
+
+/*侧滑*/
+#offcanvas{
+	position:fixed;
+	top:0px;
+	z-index: 999;
+	width:100%;
+	height:100%;
+	background-color:#FFFFFF;
+	overflow: scroll;
+}
+
+#offcanvas .article-content{
+	padding:0.5rem;
+    padding-top: 55px;
+}
+#offcanvas .article-content img{
+	width: 100%;
+}

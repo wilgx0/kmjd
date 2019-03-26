@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+ 	<link href="css/mui.min.css" rel="stylesheet"/>
+	<link rel="stylesheet" type="text/css" href="css/animate.css" />
+	<style>
+	
+		.mui-content>.mui-table-view:first-child {
+			margin-top: -1px;
+		}
+
+	</style>
+</head>
+<body>
+	
+<div id="app">
+	
+	<header class="mui-bar mui-bar-nav">
+		<h1 id="title" class="mui-title">报备客户列表</h1>
+	</header>
+	
+	<!--下拉刷新容器-->
+	<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+		<div class="mui-scroll">
+			<!--数据列表-->
+			<ul class="mui-table-view mui-table-view-chevron">
+                <li class="mui-table-view-cell" v-for="(v,i) in client_list">
+                    <a class="mui-navigate-right">{{v.client_name}}</a>
+                </li>
+            </ul>
+		</div>
+	</div>
+	
+</div>
+
+<script src="js/mui.min.js"></script>
+<script src='js/vue/vue.dev.js'></script>
+<script src="js/app/common.js?v=1811081661"></script>
+<script >
+	common.setHtmlFontSize();
+	var app = new Vue({
+		el: '#app',
+		data: {
+		  client_list:[],
+		},
+		methods: {
+			
+		}
+	});
+
+	(function($) {
+		$.init();
+
+		//下拉列表初始化
+        var pullrefresh = $('#pullrefresh');
+
+        pullrefresh.pullRefresh({
+            down: {
+                style:'circle',
+                callback: pulldownRefresh
+            },
+            up: {
+                auto:true,
+                contentrefresh: '正在加载...',
+                callback: pullupRefresh
+            }
+        });
+
+		var page = 1;
+
+        //获取列表数据
+        function getListData(callback){
+            common.token_http(common.baseUrl + '/api/pm/Baobei/get_list',{page:page++},function(response){
+                var hasData = response.code == 1 && response.data.length > 0;
+                callback && callback(hasData);
+               if(hasData){
+                   pullrefresh.pullRefresh().endPullupToRefresh(false);
+                   app.client_list = app.client_list.concat(response.data);
+               } else {
+                   pullrefresh.pullRefresh().endPullupToRefresh(true);
+               }
+
+            },function(){ callback && callback(false);})
+        }
+
+        //上拉加载
+		function pullupRefresh() {
+            getListData();
+		}
+
+		/**
+		 * 下拉刷新
+		 */
+		function pulldownRefresh() {
+		    var temp = page;
+            page = 1;
+            pullrefresh.pullRefresh().refresh(true); //重置上拉加载
+            getListData(function(hasData){
+                if(hasData){
+                    app.client_list = [];
+                } else {
+                    page = temp;
+                }
+                pullrefresh.pullRefresh().endPulldownToRefresh();
+            });
+		}
+		
+	})(mui);
+	
+
+    
+</script>
+</body>
+</html>

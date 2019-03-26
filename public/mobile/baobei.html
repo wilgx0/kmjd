@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="css/animate.css" />
+		<link rel="stylesheet" type="text/css" href="css/mui.picker.min.css" />
+		<link href="css/mui.poppicker.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="css/app/common.css"/>
+		<link rel="stylesheet"  href="css/app/baobei.css?v=1811121513"/>
+		<style>
+			.img-mobile{
+                display: flex;
+                align-items:center;
+            }
+            .img-mobile :first-child{
+                width: 6rem;
+            }
+		</style>
+	</head>
+
+	<body>
+
+		<div id="app">
+			<div class='head'>
+				<h1>项目报备</h1>
+                <button type="button" class="mui-btn" @click="logoff">注销</button>
+			</div>
+			<div class='field-item mark'>
+				<div>报备项目:</div>
+				<div>
+					<button id='showUserPicker' class="mui-btn mui-btn-block" type='button' data-name='报备项目' ref='obj_id'>请选择</button>
+				</div>
+			</div>
+
+			<div class='field-item mark'>
+				<div>客户姓名:</div>
+				<div class='img-personnel'>
+					<input type="text" v-model="client_name" data-name='客户姓名' ref='client_name'>
+				</div>
+			</div>
+
+			<div class='field-item mark'>
+				<div>客户电话:(只需录入前3及后4位)</div>
+				<div class='img-mobile'>
+					<input type="text" v-model="client_mobile_left" data-name='客户电话' ref='client_mobile' maxlength="3">****<input type="text" v-model="client_mobile_right" maxlength="4">
+				</div>
+			</div>
+
+			<div class='field-item mark'>
+				<div>客户预计到访时间:</div>
+				<div>
+					<button  data-options='{}' class="btn mui-btn mui-btn-block" name="client_time"  data-name='客户到访时间' ref='client_time'>选择时间 ...</button>
+				</div>
+			</div>
+
+			<div class='field-item mark'>
+				<div>客户到访人数:(请输入大于等于1的数字)</div>
+				<div class='img-number'>
+					<input type="number" v-model="client_num" data-name='客户到访人数' ref='client_num'>
+				</div>
+			</div>
+
+
+			<div class='foot'>
+                <div ref='error' class='error'></div>       <!--数据验证-->
+                <button type="button" class="mui-btn mui-btn-block" @click="sendMessage">提交</button>
+			</div>
+
+
+            <!--侧滑-->
+            <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+                <div id='offcanvas'  v-show="showOffcanvas">
+                    <iframe :src="loginUrl" style="width: 100%;height:100%;"></iframe>
+                </div>
+            </transition>
+
+            <!--加载动画-->
+            <div class='loading' v-show="showLoading">
+                <img src="img/app/loading.gif" alt="" />
+            </div>
+
+		</div>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.picker.min.js"></script>
+		<script src="js/mui.poppicker.js"></script>
+		<script src='js/vue/vue.dev.js'></script>
+		<script src="js/app/common.js?v=1811081661"></script>
+		<script>
+			common.setHtmlFontSize();
+			var app = new Vue({
+				el: '#app',
+				data: {
+                    showOffcanvas: false,       //侧滑
+                    showLoading:false,          //加载动画
+                    loginUrl:'',            //登录界面url
+                    obj_id:'',           //报备项目id
+                    client_name:'',       //客户名称
+                    client_mobile_left:'',       //客户电话
+                    client_mobile_right:'',       //客户电话
+                    client_mobile:'',               //客户电话
+                    client_time:'',         //客户到访时间
+                    client_num:'',          //客户到访人数
+				},
+				methods: {
+                    logoff:function(){
+                        common.logoff();
+                    },
+                    sendMessage:function(){
+                        var _this = this;
+                        //数据验证
+                        function checkData(callback){
+                            _this.$refs['error'].innerHTML = '';
+                            for(var i in _this.$data){
+                                var v = _this.$data[i];
+                                var result = callback(i,v);
+                                if( result != ''){
+                                    var el = _this.$refs[i];
+                                    if(el){
+                                        var p = document.createElement('p')
+                                        p.innerHTML = el.getAttribute('data-name') + result;
+                                        _this.$refs['error'].appendChild(p);
+                                    }
+                                }
+                            }
+                        }
+
+                        function isMobile(str,myreg= /^1[345789]\d{9}$/) {
+                            if (!myreg.test(str)) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }
+
+                        checkData(function(i,v){
+                            if(v == '')  return  ' 必填';
+                            if( i == 'client_mobile' ){
+                                var reg = /^1[345789]\d{5}$/;
+                                if(!isMobile(v,reg)) return ' 格式错误';
+                            }
+                            return '';
+                        });
+
+                        if(_this.$refs['error'].innerHTML != ''){
+                            return false;
+                        }
+
+                        /**
+                         * 检查电话号码是否重复
+                         * */
+                        _this.showLoading = true;
+                        common.token_http(common.baseUrl + '/api/pm/Baobei/checkClientMobile',{
+                            client_mobile:_this.client_mobile,
+                        },function(data){
+                            if(data.code == 1){
+                                sendMessage();
+                            } else {
+                                _this.showLoading = false;
+                                var btnArray = ['否', '是'];
+                                mui.confirm('客户电话号码在系统中已经存在，是否继续录入？', '温馨提示', btnArray, function(e) {
+                                    if (e.index == 1) { //是
+                                        sendMessage();
+                                    } else {        //否
+
+                                    }
+                                })
+                            }
+                        },function(){_this.showLoading = false;})
+
+
+                        function sendMessage(){
+                            _this.showLoading = true;
+                            //数据提交
+                            var postData = {
+                                obj_id:_this.obj_id,
+                                client_name:_this.client_name,
+                                client_mobile:_this.client_mobile,
+                                client_time:_this.client_time,
+                                client_num:_this.client_num,
+                            };
+                            common.token_http(common.baseUrl + '/api/pm/Baobei/add',postData,function(data){
+                                _this.showLoading = false;
+                                if(data.code == 1){
+                                    _this.obj_id  = '';
+                                    _this.client_name = '';
+                                    _this.client_mobile = '';
+                                    _this.client_mobile_left = '';
+                                    _this.client_mobile_right = '';
+                                    _this.client_time = '';
+                                    _this.client_num = '';
+
+                                    _this.$refs['error'].innerHTML = '';
+                                    clearDtPicker();
+                                    mui.toast(data.msg);
+                                } else if(data.msg) {
+                                    mui.toast(data.msg);
+                                } else {
+                                    mui.toast('添加失败!');
+                                }
+                            },function(){_this.showLoading = false;})
+                        }
+
+                    }
+				},
+                mounted:function(){
+				    var _this = this;
+                    common.isLogin(function(response){
+                        if(!response){
+                            _this.loginUrl  = common.baseUrl + '/mobile/login.html';
+                            _this.showOffcanvas = true;
+                        } else {
+                            pageInit();
+                        }
+                    });
+                },
+                watch:{
+                    showOffcanvas:function(v){
+                        if(v === false){
+                            pageInit();
+                        }
+                    },
+                    client_mobile_left:function(v){
+                        this.client_mobile = v + this.client_mobile_right;
+                    },
+                    client_mobile_right:function(v){
+                        this.client_mobile = this.client_mobile_left + v;
+                    },
+                }
+			});
+
+			(function($, doc) {
+				$.init();
+
+                var isPageInit = false;
+                //页面远程数据初始化
+                function pageInit(){
+                    if(!isPageInit){
+                        isPageInit = true;
+                        getPmObj();
+                    }
+
+                }
+                window['pageInit'] = pageInit;
+
+                //清理时间选择控件上的显示值
+                function clearDtPicker(){
+                    var btns = $('.btn');
+                    btns.each(function(i, btn) {
+                        this.innerText = '选择时间 ...';
+                    })
+                }
+                window['clearDtPicker'] = clearDtPicker;
+
+                //获取项目数据
+				function getPmObj(){
+                    common.token_http(common.baseUrl + '/api/pm/Baobei/getObj',{},function(data){
+                        console.log(data);
+                        if(data.code == 1){
+                            var pickerData = [];
+                            for(var i = 0 ;i < data.data.length; i++){
+                                pickerData.push({
+                                    value: data.data[i].id,
+                                    text: data.data[i].obj_name
+                                });
+                            }
+                            initPicker(pickerData);
+                        }
+                    })
+                }
+
+                //报备项目初始化
+                function initPicker(data){
+                    //报备项目
+                    var userPicker = new $.PopPicker();
+                    userPicker.setData(data);
+                    var showUserPickerButton = doc.getElementById('showUserPicker');
+                    showUserPickerButton.addEventListener('tap', function(event) {
+                        userPicker.show(function(items) {
+                            //console.log(JSON.stringify(items[0]));
+                            showUserPickerButton.innerText = items[0].text;
+                            app.obj_id = items[0].value;
+                            //返回 false 可以阻止选择框的关闭
+                            //return false;
+                        });
+                    }, false);
+                }
+
+
+
+
+				$.ready(function() {
+					//报备日期
+					var btns = $('.btn');
+					btns.each(function(i, btn) {
+						btn.addEventListener('tap', function() {
+							var _self = this;
+							if(_self.picker) {
+								_self.picker.show(function(rs) {
+									console.log('选择结果1: ' + rs.text);
+									_self.picker.dispose();
+									_self.picker = null;
+								});
+							} else {
+								var optionsJson = this.getAttribute('data-options') || '{}';
+								var options = JSON.parse(optionsJson);
+								var id = this.getAttribute('id');
+								/*
+								 * 首次显示时实例化组件
+								 * 示例为了简洁，将 options 放在了按钮的 dom 上
+								 * 也可以直接通过代码声明 optinos 用于实例化 DtPicker
+								 */
+								_self.picker = new $.DtPicker(options);
+								_self.picker.show(function(rs) {
+									/*
+									 * rs.value 拼合后的 value
+									 * rs.text 拼合后的 text
+									 * rs.y 年，可以通过 rs.y.vaue 和 rs.y.text 获取值和文本
+									 * rs.m 月，用法同年
+									 * rs.d 日，用法同年
+									 * rs.h 时，用法同年
+									 * rs.i 分（minutes 的第二个字母），用法同年
+									 */
+									console.log('选择结果2: ' + rs.text);
+								    if(_self.name == 'baobei_time'){
+                                        app.baobei_time = rs.text;
+                                    }
+                                    if(_self.name == 'client_time'){
+                                        app.client_time = rs.text;
+                                    }
+									_self.innerText = rs.text;
+									/*
+									 * 返回 false 可以阻止选择框的关闭
+									 * return false;
+									 */
+									/*
+									 * 释放组件资源，释放后将将不能再操作组件
+									 * 通常情况下，不需要示放组件，new DtPicker(options) 后，可以一直使用。
+									 * 当前示例，因为内容较多，如不进行资原释放，在某些设备上会较慢。
+									 * 所以每次用完便立即调用 dispose 进行释放，下次用时再创建新实例。
+									 */
+									_self.picker.dispose();
+									_self.picker = null;
+								});
+							}
+
+						}, false);
+					});
+				})
+			})(mui, document);
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<!--<link href="css/mui.min.css" rel="stylesheet" />-->
+        <link rel="stylesheet" type="text/css" href="css/animate.css" />
+		<link rel="stylesheet" type="text/css" href="css/app/common.css"/>
+		<link rel="stylesheet"  href="css/app/baobei.css?v=1811121513"/>
+		<style>
+            .head{
+                height:72.5px;
+                box-sizing:border-box;
+            }
+            .head button{
+                box-sizing:border-box;
+                background-color:#ffffff;
+                height:34px;
+                width:54px;
+                border:1px solid #ccc;
+                border-radius:3px;
+            }
+            .content {
+                padding:0.5rem;
+            }
+			.content img{
+                width:100%;
+            }
+
+            .download-list{
+                overflow: hidden;
+            }
+            .download-list > h4 {
+                margin:0;
+                color:#acbdc4;
+            }
+            .download-list > a{
+                text-decoration: none;
+                display: table;
+                margin: 5px 0;
+                background-color:#f0ad4e;
+                border:1px solid #f0ad4e;
+                border-radius: 5px;
+                color:#fff;
+                font-size:14px;
+                padding: 2px;
+            }
+		</style>
+	</head>
+
+	<body>
+
+		<div id="app">
+            <div class='head'>
+                <h1>佣金说明</h1>
+                <button type="button" class="mui-btn" @click="logoff">注销</button>
+            </div>
+            <div v-if="aticle.more && aticle.more.files && aticle.more.files.length > 0" class="download-list">
+                <h4>附件:</h4>
+                <a v-for="(v,i) in aticle.more.files" :href="v.url"  :download="v.name">{{v.name}}</a>
+
+            </div>
+            <div class="content" v-html="aticle.post_content || ''">
+
+            </div>
+
+            <!--侧滑-->
+            <transition enter-active-class="animated fadeInRight" leave-active-class="animated fadeOutRight">
+                <div id='offcanvas'  v-show="showOffcanvas">
+                    <iframe :src="loginUrl" style="width: 100%;height:100%;"></iframe>
+                </div>
+            </transition>
+
+            <!--加载动画-->
+            <div class='loading' v-show="showLoading">
+                <img src="img/app/loading.gif" alt="" />
+            </div>
+
+		</div>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.picker.min.js"></script>
+		<script src="js/mui.poppicker.js"></script>
+		<script src='js/vue/vue.dev.js'></script>
+		<script src="js/app/common.js?v=1811081661"></script>
+		<script>
+			common.setHtmlFontSize();
+			var app = new Vue({
+				el: '#app',
+				data: {
+                    showOffcanvas: false,       //侧滑
+                    showLoading:false,          //加载动画
+                    loginUrl:'',            //登录界面url
+                    aticle:{},
+				},
+				methods: {
+                    logoff:function(){
+                        common.logoff();
+                    }
+				},
+                mounted:function(){
+				    var _this = this;
+                    common.isLogin(function(response){
+                        if(!response){
+                            _this.loginUrl  = common.baseUrl + '/mobile/login.html';
+                            _this.showOffcanvas = true;
+                        } else {
+                            pageInit();
+                        }
+                    });
+                },
+                watch:{
+                    showOffcanvas:function(v){
+                        if(v === false){
+                            pageInit();
+                        }
+                    }
+                }
+			});
+
+			(function($, doc) {
+				$.init();
+
+
+                var isPageInit = false;
+                //页面远程数据初始化
+                function pageInit(){
+                    if(!isPageInit){
+                        isPageInit = true;
+                        get_aticle();
+                    }
+
+                }
+                window['pageInit'] = pageInit;
+
+
+                // //列表文章分类的id
+                // var aid = common.getQueryString('aid');
+                //
+                // if(!aid){
+                //     alert('参数aid不能为空！');
+                //     return false;
+                // }
+
+                function get_aticle(){
+                   // common.token_get(common.baseUrl + '/api/portal/pages/'+ aid,{},function(response){
+                    common.token_get(common.baseUrl + '/api/pm/Baobei/get_user_article',{},function(response){
+                        if(response.code == 1){
+                            app.aticle = response.data;
+                        }else if(response.msg){
+                            $.alert(response.msg);
+                        }
+                    })
+                }
+			})(mui, document);
+		</script>
+	</body>
+
+</html>

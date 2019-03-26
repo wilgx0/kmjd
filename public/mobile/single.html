@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+ 	<link href="css/mui.min.css" rel="stylesheet"/>
+	<style>
+        body{
+            padding:1.3rem;
+            background-color:#fff;
+        }
+        .head > h1{
+            font-size:24px;
+            line-height:1.9rem;
+        }
+        .main{
+
+        }
+        .main .published-time{
+            color:#909090;
+            font-size:12px;
+        }
+        .main .excerpt {
+            line-height:1.3rem;
+            font-size:15px;
+            margin:1rem 0;
+            color:rgb(51, 51, 51);
+            background-color:#e4f1eb;
+            padding:0.5rem;
+            border-radius: 5px;
+        }
+        .main .ar-content img{
+            width:100% !important;
+        }
+        .main > hr{
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border: 0;
+            border-top: 1px solid #e6e6e6
+        }
+	</style>
+</head>
+<body>
+	
+<div id="app">
+
+    <div class='head'>
+        <h1>{{article.post_title}}</h1>
+    </div>
+    <div class='main'>
+        <div class="published-time">发布时间:{{article.published_time}}</div>
+        <hr>
+        <div class="excerpt" v-if="article.post_excerpt">{{article.post_excerpt}}</div>
+        <div class="ar-content" v-html="article.post_content"></div>
+    </div>
+
+</div>
+
+<script src="js/mui.min.js"></script>
+<script src='js/vue/vue.dev.js'></script>
+<script src="js/app/common.js?v=1811081661"></script>
+<script src="js/app/singlepage.js"></script>
+<script >
+	
+    
+</script>
+</body>
+</html>
